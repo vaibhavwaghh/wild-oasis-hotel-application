@@ -6,6 +6,7 @@ export async function getCabins() {
     console.error(error);
     throw new Error("DATA NOT LOADED");
   }
+
   return data;
 }
 
@@ -18,24 +19,41 @@ export async function deleteCabins(id) {
   return data;
 }
 
-export async function createCabin(newCabin) {
+export async function createAndEditCabin(newCabin, id) {
+  const hasImagePath = newCabin.image?.startsWith?.(
+    import.meta.env.VITE_SUPABASE_URL
+  );
   /**IMAGE URL:- https://rxufhhpgcexvszntcykk.supabase.co/storage/v1/object/public/cabin-images/cabin-001.jpg */
   const imageName = `${Math.random()}-${newCabin.image.name}`.replaceAll(
     "/",
     ""
   );
-  const imagePath = `${
-    import.meta.env.VITE_SUPABASE_URL
-  }/storage/v1/object/public/cabin-images/${imageName}`;
-  /**1) CREATE A CABIN */
-  const { data, error } = await supabase
-    .from("cabins")
-    .insert([{ ...newCabin, image: imagePath }])
-    .select();
+  const imagePath = hasImagePath
+    ? newCabin.image
+    : `${
+        import.meta.env.VITE_SUPABASE_URL
+      }/storage/v1/object/public/cabin-images/${imageName}`;
+
+  /**1) CREATE /EDIT A CABIN */
+  let query = supabase.from("cabins");
+
+  /**CREATE CABIN -->1st query*/
+  if (!id) {
+    query = query.insert([{ ...newCabin, image: imagePath }]);
+  }
+  /**EDIT CABIN -->2nd query*/
+  if (id) {
+    query = query.update({ ...newCabin, image: imagePath }).eq("id", id);
+  }
+  const { data, error } = await query.select().single();
   if (error) {
     console.error(error);
     throw new Error("DATA NOT LOADED");
   }
+
+  /**EDITING FROM --> CASE 1: I HAVE NOT UPLOADED A NEW  IMAGE
+   * CASE 2 : I HAVE UPLOADED A NEW IMAGE
+   */
   /**2) UPLOAD IMAGE  */
   const { error: storageError } = await supabase.storage
     .from("cabin-images")
