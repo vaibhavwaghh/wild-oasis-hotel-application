@@ -10,6 +10,8 @@ import { useForm } from "react-hook-form";
 import { createAndEditCabin } from "../../services/apiCabins";
 import Spinner from "../../ui/Spinner";
 import FormRow from "../../ui/FormRow";
+import useCreateCabin from "./useCreateCabin";
+import useEditCabin from "./useEditCabin";
 
 function CreateCabinForm({ cabinToEdit = {} }) {
   const { id: editId, ...editValues } = cabinToEdit;
@@ -21,43 +23,34 @@ function CreateCabinForm({ cabinToEdit = {} }) {
   });
   const { errors } = formState;
   console.log("ERRORS FROM FORMSTATE", errors);
-  const queryClient = useQueryClient();
-  const { isLoading: isCreating, mutate: createCabin } = useMutation({
-    mutationFn: (newCabin) => createAndEditCabin(newCabin),
-    onSuccess: () => {
-      toast.success("SUCCESSFULLY CREATED A NEW CABIN");
-      queryClient.invalidateQueries({
-        queryKey: ["cabins"],
-      });
-      reset();
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    },
-  });
+  const { isCreating, createCabin } = useCreateCabin();
 
-  const { isLoading: isEditing, mutate: editCabin } = useMutation({
-    mutationFn: ({ newCabin, id }) => createAndEditCabin(newCabin, id),
-    onSuccess: () => {
-      toast.success("SUCCESSFULLY CREATED A NEW CABIN");
-      queryClient.invalidateQueries({
-        queryKey: ["cabins"],
-      });
-      reset();
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    },
-  });
+  const { isEditing, editCabin } = useEditCabin();
 
   const isWorking = isEditing || isCreating;
   function submitFn(data) {
     console.log(data);
     const image = typeof data.image === "string" ? data.image : data.image[0];
     if (isEditSession) {
-      editCabin({ newCabin: { ...data, image }, id: editId });
+      editCabin(
+        { newCabin: { ...data, image }, id: editId },
+        {
+          onSuccess: (data) => {
+            console.log(data);
+            reset();
+          },
+        }
+      );
     } else {
-      createCabin({ ...data, image: image });
+      createCabin(
+        { ...data, image: image },
+        {
+          onSuccess: (data) => {
+            console.log(data);
+            reset();
+          },
+        }
+      );
     }
   }
   function errorFn(errors) {
