@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react";
 import styled from "styled-components";
+import Pagination from "./Pagination";
 
 const StyledTable = styled.div`
   border: 1px solid var(--color-grey-200);
@@ -90,9 +91,15 @@ function Body({ data, render }) {
   return <StyledBody>{data.map(render)}</StyledBody>;
 }
 
+// function Footer() {
+//   <StyledFooter>
+//     <Pagination />
+//   </StyledFooter>;
+// }
+
 Table.Header = Header;
 Table.Row = Row;
 Table.Body = Body;
 
-Table.footer = Footer;
+Table.Footer = Footer;
 export default Table;
