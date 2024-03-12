@@ -17,7 +17,6 @@ import { useNavigate } from "react-router-dom";
 import useCheckout from "../check-in-out/useCheckout";
 import Modal from "../../ui/Modal";
 import ConfirmDelete from "../../ui/ConfirmDelete";
-import useDeleteBooking from "./useDeleteBooking";
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -67,7 +66,6 @@ function BookingRow({
   };
   const navigate = useNavigate();
   const { checkOut, isCheckingOut } = useCheckout();
-  const { isDeleteing, deleteBooking } = useDeleteBooking();
   return (
     <Table.Row>
       <Cabin>{cabinName}</Cabin>
@@ -127,10 +125,7 @@ function BookingRow({
           </Menus.List>
         </Menus.Menu>
         <Modal.Window name="delete">
-          <ConfirmDelete
-            resourceName="booking"
-            onConfirm={() => deleteBooking(bookingId)}
-          />
+          <ConfirmDelete resourceName="booking" onConfirm={() => {}} />
         </Modal.Window>
       </Modal>
     </Table.Row>
